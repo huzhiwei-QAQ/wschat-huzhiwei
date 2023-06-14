@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="false" debug="false">
+    <property name="logPath" value="/logs/"/>
+    <springProperty scope="context" name="appName" source="logging.file.name" defaultValue="wsChat"/>
+    <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %X{IDENTIFIER} %-5level [%t] %logger{36}.%M:%L - %msg%n</pattern>
+        </layout>
+    </appender>
+
+    <appender name="appLogAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${logPath}/${appName}/${appName}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${logPath}/${appName}/%d{yyyy-MM-dd}/${appName}-%d{yyyy-MM-dd}-%i.log</fileNamePattern>
+            <MaxHistory>5</MaxHistory>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>200MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %X{IDENTIFIER} %-5level [%t] %logger{36}.%M:%L - %msg%n</pattern>
+        </layout>
+    </appender>
+
+    <logger name="logging.level.cn.molu.app" level="DEBUG"/>
+    <logger name="logging.level.cn.molu.app.mapper" level="DEBUG"/>
+    <logger name="org.springframework" level="DEBUG" additivity="false"/>
+    <root level="INFO">
+        <appender-ref ref="stdout"/>
+        <appender-ref ref="appLogAppender"/>
+    </root>
+</configuration>

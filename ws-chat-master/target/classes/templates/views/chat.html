@@ -1,0 +1,83 @@
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat聊天窗</title>
+    <link th:href="@{/css/chat.css}" rel="stylesheet">
+    <script type="text/javascript" th:src="@{/js/jquery.js}"></script>
+    <script type="text/javascript" th:src="@{/js/div.move.js}"></script>
+    <script type="text/javascript" th:src="@{/js/molu.js}" ></script>
+    <script type="text/javascript" th:src="@{/js/chat.js}"></script>
+	<!-- emoji表情框滚动 -->
+	<link rel="stylesheet" th:href="@{/lib/meoji/css/jquery.mCustomScrollbar.min.css}" />
+	<link rel="stylesheet" th:href="@{/lib/meoji/css/jquery.emoji.css}" />
+	<!-- emoji表情框滚动 -->
+	<script type="text/javascript" th:src="@{/lib/meoji/script/jquery.mCustomScrollbar.min.js}"></script>
+	<script type="text/javascript" th:src="@{/lib/meoji/script/jquery.emoji.min.js}"></script>
+
+</head>
+<body>
+<input type="hidden" name="uname" class="uname" th:value="${name}" />
+<input type="hidden" name="uid" class="uid" th:value="${id}" />
+<input type="hidden" name="sessionId" class="sid" th:value="${sessionId}" />
+<input type="hidden" name="count" class="count"  />
+	<div class="box">
+		<div class="title">
+			<p class="chating">
+			<span style="float: left; padding-left: 5px; color: darkblue;" th:text="${name}"></span>
+				<font>请选择<span class="chating-user">用户</span>聊天</font>
+			</p>
+			<span class="min_hide" title="最小化">一</span>
+			<span class="close" title="关闭">X</span>
+		</div>
+		<div class="friend-list">
+			<ul class="friend-ul"></ul>
+		</div>
+
+		<div class="chat-main" id="chat-container">
+			<ul class="chating-main-msg"></ul>
+		</div>
+		<div class="sys-msg">
+			<span>系统消息</span>
+			<ul class="sys-msg-ul">
+			</ul>
+		</div>
+		<div class="tools">
+				<span class="tools-list">
+						<img src="/imgs/emoticon.png" class="face" href="javascript:;" title="表情" style="width: 18px;height: 18px;">
+                 <label for="file-input" class="custom-text">
+                  <img src="/imgs/file.png"  style="width: 18px;height: 18px;">
+				  </label>
+                  <input id="file-input" type="file" multiple  onchange="readFiles()">
+				</span>
+		</div>
+		<div class="input-text" id="inputBox">
+			<!-- <textarea class="edit-msg"></textarea> -->
+			<div class="edit-msg" contenteditable id="edit-msg"></div>
+		</div>
+		<div class="bottom-bar">
+			<button class="closeDiv close-click">关闭</button>
+			<button class="sendMsg" id="sendMsg">发送</button>
+		</div>
+	</div>
+</body>
+<script>
+	const sendBtn = document.getElementById('sendMsg');
+	const inputBox = document.getElementById('inputBox');
+
+	inputBox.addEventListener('keydown', function(event) {
+		if (event.keyCode === 13) {
+			event.preventDefault();
+			sendBtn.click();
+		}
+	});
+
+	const chatContainer = document.getElementById("chat-container");
+
+	chatContainer.addEventListener("scroll", function() {
+		if (chatContainer.scrollTop === 0) {
+			console.log("测试测试");
+			getHistoryChatMessage();
+		}
+	});
+</script>
+</html>

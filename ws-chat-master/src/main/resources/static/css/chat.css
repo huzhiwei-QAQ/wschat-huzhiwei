@@ -1,0 +1,314 @@
+* {
+	margin: 0;
+	padding: 0;
+}
+
+.box {
+	position: fixed;
+	top: 20px;
+	left: 20px;
+	min-width: 200px;
+	min-height: 200px;
+	border: 1px solid #666;
+	background: #fff;
+}
+
+.box .title {
+	background: #ddd;
+	height: 30px;
+	min-width: 200px;
+	cursor: move;
+}
+
+.box .close {
+	color: #d08;
+	display: block;
+	width: 18px;
+	height: 18px;
+	line-height: 20px;
+	text-align: center;
+	cursor: pointer;
+	position: absolute;
+	right: 5px;
+	top: 5px;
+	font-weight: bold;
+}
+
+.con {
+	padding: 20px;
+}
+
+.bg_change_size {
+	background: url('../imgs/size2.png') no-repeat;
+}
+
+body {
+	/* height: 3000px; */
+	/*background: #f7f6f5;*/
+	background:url('../imgs/5.jpg');
+	background-size: cover;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+.box {
+	position: absolute;
+	border: 1px solid #999;
+	width: 715px;
+	height: 550px;
+	box-shadow: 0px 2px 11px #999;
+	top: 15%;
+	left: 30%;
+	border-radius: 3px;
+}
+
+.min_hide:hover, .close:hover {
+	background-color: red;
+}
+
+.min_hide {
+	color: #fff;
+	display: block;
+	width: 18px;
+	height: 18px;
+	line-height: 20px;
+	text-align: center;
+	cursor: pointer;
+	position: absolute;
+	right: 30px;
+	top: 5px;
+	font-weight: bold;
+}
+
+a {
+	text-decoration: none;
+	color: #999;
+}
+
+.box .close {
+	color: #fff;
+	display: block;
+	width: 18px;
+	height: 18px;
+	line-height: 20px;
+	text-align: center;
+	cursor: pointer;
+	position: absolute;
+	right: 5px;
+	top: 5px;
+}
+
+.friend-list {
+	float: right;
+	width: 150px;
+	height: 360px;
+	overflow-y: auto;
+}
+
+.sys-msg {
+	float: right;
+	width: 150px;
+	height: 160px;
+	overflow-y: auto;
+}
+
+.chat-main {
+	float: left;
+	width: 565px;
+	height: 360px;
+	overflow-y: auto;
+}
+
+.input-text {
+	float: left;
+	width: 565px;
+	height: 105px;
+}
+
+.bottom-bar {
+	float: left;
+	width: 565px;
+	height: 30px;
+	text-align: right;
+}
+
+div {
+	box-shadow: 0px 0px 1px #999;
+}
+
+.friend-li {
+	display: flex;
+	align-items: center;
+	padding-left: 5px;
+	cursor: default;
+}
+
+.friend-img {
+	width: 20px;
+	height: 20px;
+	box-shadow: 0px 1px 2px 1px #999;
+	margin-right: 5px;
+	border-radius: 10px;
+	margin-top: 5px;
+}
+
+.friend-msg-li {
+	display: flex;
+	align-items: center;
+	margin: 5px;
+}
+
+.friend-msg-img {
+	width: 25px;
+	height: 25px;
+	margin-right: 10px;
+	box-shadow: 1px 1px 8px #999;
+	margin-top: 3px;
+}
+
+.friend-msg-span {
+	border-radius: 4px;
+	padding: 3px 5px 5px;
+	line-height: 20px;
+	box-shadow: 1px 3px 13px #999;
+	background-color: #fff;
+}
+
+.sys-msg-ul {
+	padding: 0px 5px;
+}
+
+.sys-msg-li {
+	color: #9d9d9d;
+	font-family: 宋体;
+	margin-top: 5px;
+}
+
+.chating {
+	text-align: center;
+	padding-top: 5px;
+}
+
+.chating-user {
+	color: #db41ca;
+}
+
+.myself-li {
+	display: flex;
+	margin: 5px;
+	justify-content: flex-end;
+	align-items: center;
+}
+
+.myself-msg-img {
+	width: 25px;
+	height: 25px;
+	margin-left: 10px;
+	box-shadow: 1px 1px 8px #999;
+	margin-top: 3px;
+}
+
+.myself-msg-span {
+	border-radius: 4px;
+	padding: 3px 5px 5px;
+	line-height: 20px;
+	box-shadow: 1px 3px 13px #999;
+	background-color: #99e4ff;
+}
+
+.tools {
+	float: left;
+	width: 565px;
+	height: 25px;
+	/* background: azure; */
+}
+
+.edit-msg {
+	width: 560px;
+	/* box-shadow: 0px 0px 2px #999; */
+	border: none;
+	padding-left: 5px;
+	padding-top: 5px;
+	padding-right: 0px;
+	height: 100px;
+	resize: none;
+	outline: none;
+	display: flex;
+	align-items: flex-start;
+}
+
+.closeDiv {
+	width: 90px;
+	height: 30px;
+	color: black;
+	margin-right: 20px;
+	border: none;
+}
+
+.sendMsg {
+	width: 90px;
+	height: 30px;
+	background-color: #3499d8;
+	color: white;
+	border: none;
+}
+
+.sendMsg:hover {
+	background-color: #26a2ef;
+}
+
+.closeDiv:hover {
+	background-color: red;
+}
+
+.friend-li:hover {
+	background: antiquewhite;
+}
+
+.tools-list {
+	margin-left: 10px;
+}
+
+.tools-list-a {
+	color: #eab706;
+}
+
+.selected-li {
+	background: antiquewhite;
+}
+
+.msg-count {
+	width: 17px;
+	height: 17px;
+	background: #ff0909;
+	text-align: center;
+	border-radius: 10px;
+	font-size: 12px;
+	color: #fff;
+	box-shadow: 0px 0px 3px 0px #f91919;
+	margin-left: 65px;
+	display: none;
+}
+
+.emoji_icon {
+	width: 25px;
+}
+
+.myself-msg-span, .friend-msg-span {
+	display: flex;
+	align-items: center;
+}
+
+input[type="file"] {
+	opacity: 0;
+	position: absolute;
+	z-index: -1;
+}
+
+.custom-text {
+	display: inline-block;
+	padding: 6px 6px;
+	color: #fff;
+	border-radius: 4px;
+	cursor: pointer;
+}

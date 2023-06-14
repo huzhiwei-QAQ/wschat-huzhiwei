@@ -3,6 +3,7 @@ package cn.molu.app.service.impl;
 import cn.molu.app.mapper.MessageMapper;
 import cn.molu.app.pojo.Message;
 import cn.molu.app.pojo.MessageQuery;
+import cn.molu.app.pojo.ReponseResult;
 import cn.molu.app.pojo.ResultMessage;
 import cn.molu.app.service.MessageService;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
@@ -26,7 +27,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public Object queryChatMessageList(MessageQuery messageQuery) {
+    public PageInfo queryChatMessageList(MessageQuery messageQuery) {
         String sort=null;
         if(messageQuery.isAsc()){
             sort="asc";
@@ -36,6 +37,7 @@ public class MessageServiceImpl implements MessageService {
         String orderBy= messageQuery.getOrderByField()+" "+sort;
         PageHelper.startPage(messageQuery.getPageNum(),messageQuery.getPageSize(),orderBy);
         List<Message> messageList= messageMapper.queryChatMessageList(messageQuery);
+        System.out.println(messageList);
         PageInfo<Message> pageInfo = new PageInfo<>(messageList);
         return pageInfo;
     }
