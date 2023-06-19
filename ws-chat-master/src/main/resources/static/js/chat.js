@@ -281,6 +281,10 @@ function chatWith(id, name, obj) {
 }
 
   function getHistoryChatMessage(){
+    if(pageNum===0){
+        console.log("没有下一页");
+        return;
+    }
       const data = {fromId:userId,toId:toId,pageNum:pageNum,pageSize:20,isAsc:false,orderByField:"create_time"};
       fetch('/message/queryChatMessageList', {
           method: 'POST',
@@ -321,7 +325,6 @@ function chatWith(id, name, obj) {
                       }else {
                           console.log("下一页");
                           const height = $(".chat-main")[0].scrollHeight;
-                          console.log("height:"+height);
                           $(".chating-main-msg").prepend(chatData);
                           $(".chat-main")[0].scrollTop = $(".chat-main")[0].scrollHeight-height;
                       }
@@ -337,6 +340,8 @@ function chatWith(id, name, obj) {
               if(data.hasNextPage===true){
                   console.log("有无下一页:"+data.hasNextPage);
                   pageNum=data.nextPage;
+              }else {
+                  pageNum=0;
               }
           }).catch(error => {
               console.error(error);
@@ -367,7 +372,6 @@ async function sendMsg(ws) {
             method: "POST",
             body: formData,
         }).then(response => response.json()).then(data => {
-            console.log(data);
             if(data.code==200){
                 msg='<img src="'+data.data+'" style="max-width:300px;height:auto;">';
             }
@@ -407,11 +411,9 @@ async function sendMsg(ws) {
 
  function isBase64Image(str) {
     try {
-        const base64Header = "data:image/png;base64";
-        const base64Header2 = "data:image/jpeg;base64";
+        const base64Header = "<img src=\"data:image/";
         const base64Index = str.indexOf(base64Header);
-        const base64Index2 = str.indexOf(base64Header2);
-        if (base64Index === -1&&base64Index2=== -1) {
+        if (base64Index === -1) {
             return false;
         } else {
             return true;
@@ -512,16 +514,56 @@ function readFiles() {
 
     for (const file of files) {
         const reader = new FileReader();
+        reader.readAsDataURL(file);
+            console.log("fileType:"+file.type);
+            reader.onload = function(event) {
+            const media = document.createElement(file.type.startsWith("video") ? "video" : "img");
+            media.src = event.target.result;
+            if (file.type.startsWith("video")) {
+                media.addEventListener("loadeddata", async function () {
+                    let msg;
+                    if (!toId || !toName) {
+                        tips("sendMsg", "请选择好友...");
+                        return;
+                    }
+                    //将视频上传到服务器
+                    const formData = new FormData();
+                    formData.append("file", file);
+                    await fetch("/file/uploadFile", {
+                        method: "POST",
+                        body: formData
+                    }).then(response => response.json()).then(data => {
+                        if (data.code == 200) {
+                            msg = '<video src="' + data.data + '" style="max-width:300px;height:auto;" controls autoplay></video>';
+                        }
+                    }).catch(error => {
+                        console.log(error);
+                    });
 
-        reader.onload = function(event) {
-            const img = document.createElement("img");
-            img.src = event.target.result;
-            img.style.width = "auto ";
-            img.style.maxHeight = "100px ";
-            document.getElementById("edit-msg").appendChild(img);
+                    let jsonMessage = {
+                        "fromName": username, //消息发送人姓名
+                        "fromId": userId, //消息发送人id
+                        "toName": toName, //消息接收人姓名
+                        "toId": toId, //消息接收人id
+                        "message": msg //发送的消息内容
+                    };
+                    // 发送数据给服务器
+                    webSocket.send(JSON.stringify(jsonMessage));
+                    // 显示发送数据
+                    let img = `<span><img src='${imgUrl}' class="myself-msg-img"/></span>`;
+                    // let li = `<li class='myself-li'><div class="video-container">${msg}</div>${img}</li>`;
+                    let li = `<li class='myself-li'><span class="myself-msg-span">${msg}</span>${img}</li>`;
+                    $(".chating-main-msg").append(li);
+                    $(".edit-msg").html('');
+                    scrollIntoView();
+                });
+            } else {
+                media.style.width = "auto";
+                media.style.maxHeight = "100px";
+                document.getElementById("edit-msg").appendChild(media);
+            }
         };
 
-        reader.readAsDataURL(file);
     }
 }
 
