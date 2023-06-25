@@ -2,15 +2,12 @@ package cn.molu.app.controller;
 
 
 import cn.hutool.core.io.FileUtil;
-import cn.molu.app.config.MinioConfig;
 import cn.molu.app.pojo.ReponseResult;
+import cn.molu.app.config.MinioConfig;
 import cn.molu.app.utils.MinioClientUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

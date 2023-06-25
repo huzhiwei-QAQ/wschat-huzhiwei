@@ -23,7 +23,14 @@ import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
 import cn.molu.app.callable.AddMessageRunnable;
+import cn.molu.app.config.GetHttpSessionConfigurator;
+import cn.molu.app.pojo.Result;
+import cn.molu.app.pojo.ResultMessage;
+import cn.molu.app.pojo.User;
 import cn.molu.app.service.MessageService;
+import cn.molu.app.utils.ObjectUtils;
+import cn.molu.app.utils.RedisUtils;
+import cn.molu.app.utils.SpringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,14 +41,7 @@ import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import cn.molu.app.config.GetHttpSessionConfigurator;
 import cn.molu.app.pojo.Message;
-import cn.molu.app.pojo.Result;
-import cn.molu.app.pojo.ResultMessage;
-import cn.molu.app.pojo.User;
-import cn.molu.app.utils.ObjectUtils;
-import cn.molu.app.utils.RedisUtils;
-import cn.molu.app.utils.SpringUtils;
 
 /**
  * @author 陌路
@@ -176,7 +176,7 @@ public class ChatEndpoint {
         LOGGER.info("接收到好友发来的数据：{}", resultMessage);
 
         //储存发送的聊天记录
-        AddMessageRunnable addMessageRunnable=new AddMessageRunnable(JSON.parseObject(resultMessage,ResultMessage.class),messageService);
+        AddMessageRunnable addMessageRunnable=new AddMessageRunnable(JSON.parseObject(resultMessage, ResultMessage.class),messageService);
         threadPoolExecutor.execute(addMessageRunnable);
 
         // 点对点发送数据（给指定用户发送消息）

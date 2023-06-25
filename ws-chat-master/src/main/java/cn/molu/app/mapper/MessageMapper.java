@@ -1,10 +1,9 @@
 package cn.molu.app.mapper;
 
-import cn.molu.app.pojo.Message;
 import cn.molu.app.pojo.MessageQuery;
 import cn.molu.app.pojo.ResultMessage;
+import cn.molu.app.pojo.Message;
 import org.apache.ibatis.annotations.Mapper;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 

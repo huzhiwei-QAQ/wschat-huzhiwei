@@ -7,6 +7,8 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import cn.molu.app.pojo.User;
+import cn.molu.app.vo.R;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,11 +22,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import cn.hutool.core.lang.Validator;
-import cn.molu.app.pojo.User;
 import cn.molu.app.service.UserService;
 import cn.molu.app.utils.ObjectUtils;
 import cn.molu.app.utils.RedisUtils;
-import cn.molu.app.vo.R;
 
 /**
  * @author dell
