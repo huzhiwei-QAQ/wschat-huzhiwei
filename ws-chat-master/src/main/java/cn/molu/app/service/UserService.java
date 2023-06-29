@@ -1,5 +1,6 @@
 package cn.molu.app.service;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
@@ -25,4 +26,5 @@ public interface UserService {
 
     String getToken(User user) throws Exception;
 
+    List<User> queryFriendsList(User user);
 }

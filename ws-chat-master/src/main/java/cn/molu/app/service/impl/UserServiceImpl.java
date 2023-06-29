@@ -2,6 +2,7 @@ package cn.molu.app.service.impl;
 
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -130,5 +131,12 @@ public class UserServiceImpl implements UserService {
         cookie.setMaxAge(7 * 24 * 60 * 60);
         cookie.setPath("/index/CheckData");
         res.addCookie(cookie);
+    }
+
+
+    @Override
+    public List<User> queryFriendsList(User user) {
+        List<User> userList=  userMapper.queryFriendsList(user.getId());
+        return userList;
     }
 }

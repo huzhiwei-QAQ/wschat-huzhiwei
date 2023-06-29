@@ -138,7 +138,7 @@ function reconnect() {
     }, 3000);
 }
 
-function message(event) {
+async function message(event) {
     //获取服务端推送过来的消息
     let result = event.data;
     // 将message转为JSON对象
@@ -187,6 +187,55 @@ function message(event) {
                 tips("sendMsg", `用户：${user.username}上线了`);
             }
         }
+        // let friends;
+        const data = {id: userId};
+        await fetch("/user/queryFriendsList", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        }).then(response => response.json()).then(data => {
+            if (data.code == 200) {
+                let    friends = data.data;
+                const uniqueUsers = [];
+
+                // 遍历friends中的每个用户
+                for (let i = 0; i < friends.length; i++) {
+                    let isDuplicate = false;
+
+                    // 检查当前用户的姓名是否在allUser中
+                    for (let j = 0; j < allUser.length; j++) {
+                        if (friends[i].id == allUser[j].userId) {
+                            isDuplicate = true;
+                            break;
+                        }
+                    }
+                    // 如果用户的姓名不是重复的，将其添加到uniqueUsers数组中
+                    if (!isDuplicate) {
+                        uniqueUsers.push(friends[i]);
+                    }
+                }
+
+                for (let user of uniqueUsers) {
+                    let count = 0;
+                    let isShow = "";
+                    if (user.id != userId) {
+                        // 组织好友列表
+                        friendList += `<li class="friend-li" onclick='chatWith("${user.id}","${user.username}",this);'>
+								<span><img style="filter: grayscale(100%) opacity(40%);" class="friend-img" src="${imgUrl}"/></span>
+								<span>${user.username}</span>
+								<span class="msg-count msg-count-${user.id}" ${isShow} title="${count}条信息未读">${count}</span>
+							</li>`;
+                    }
+                }
+            }
+        }).catch(error => {
+            console.error(error);
+        });
+
+
+
         $(".friend-ul").html(friendList);
         $(".sys-msg-ul").html(sysMsg);
         // 不是系统消息
@@ -268,6 +317,9 @@ var heartCheck = {
  * @param obj
  */
 function chatWith(id, name, obj) {
+    //切换用户，查询页数重新开始
+    pageNum = 1;
+
     toName = name;
     toId = id;
     currenChattUser = {id: id, name: name, count: 0};
