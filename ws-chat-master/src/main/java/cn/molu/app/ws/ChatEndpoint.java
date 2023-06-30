@@ -1,12 +1,8 @@
 package cn.molu.app.ws;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.time.Duration;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -24,16 +20,19 @@ import javax.websocket.server.ServerEndpoint;
 
 import cn.molu.app.callable.AddMessageRunnable;
 import cn.molu.app.config.GetHttpSessionConfigurator;
+import cn.molu.app.mapper.UserMapper;
 import cn.molu.app.pojo.Result;
 import cn.molu.app.pojo.ResultMessage;
 import cn.molu.app.pojo.User;
 import cn.molu.app.service.MessageService;
+import cn.molu.app.service.UserService;
 import cn.molu.app.utils.ObjectUtils;
 import cn.molu.app.utils.RedisUtils;
 import cn.molu.app.utils.SpringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -68,6 +67,14 @@ public class ChatEndpoint {
     }
 
     private static ThreadPoolExecutor threadPoolExecutor;
+
+
+    private static UserMapper userMapper;
+
+    @Autowired
+    public  void setUserMapper(UserMapper userMapper){
+        this.userMapper=userMapper;
+    }
 
     @Autowired
     public void setThreadPoolExecutor(ThreadPoolExecutor threadPoolExecutor){
@@ -114,7 +121,13 @@ public class ChatEndpoint {
         this.redisUtils.setObj(httpSession.getId(), res);
         onLineUser.put(userId, session);
         // 获取未读数据条数
-        Map<String, Integer> map = getUnReadCount(userId, getIds());
+
+
+        List<User> userList=  userMapper.queryFriendsList(Integer.valueOf(userId));
+
+        Set<String> ids=new HashSet<>();
+        userList.forEach(it->ids.add(String.valueOf(it.getId())));
+        Map<String, Integer> map = getUnReadCount(userId, ids);
         // 1. 获取消息，该消息为系统消息，推送给所有用户
         String message = getSysMessage(getusers(), map);
         // 2. 调用方法进行系统消息的推送
@@ -185,6 +198,26 @@ public class ChatEndpoint {
             if (toSession.isOpen()) {
                 Basic basicRemote = toSession.getBasicRemote();
                 basicRemote.sendText(resultMessage);
+            }
+        }else {
+            //发送离线消息，记录未读消息条数
+            String fromId = msgObj.getFromId();
+            String userId = msgObj.getToId();
+            if (StringUtils.isNotBlank(fromId) && StringUtils.isNotBlank(userId)) {
+                try {
+                    String redisCountKey = "UN_READ_MSG_COUNT_" + fromId + "_" + userId;
+                    String count = this.redisUtils.getStr(redisCountKey);
+                    if(StringUtils.isBlank(count)){
+                        count="1";
+                    }else {
+                        count = ObjectUtils.getStr(Integer.parseInt(count) + 1);
+                    }
+                    this.redisUtils.setStr(redisCountKey, count, Duration.ofDays(7));
+                    LOGGER.info("获取未读消息条数:{}...{}", count, redisCountKey);
+                } catch (Exception e) {
+                    LOGGER.info("获取未读消息时出现异常...{}", e.getMessage());
+                    e.printStackTrace();
+                }
             }
         }
     }

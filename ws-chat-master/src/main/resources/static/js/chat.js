@@ -220,6 +220,16 @@ async function message(event) {
                 for (let user of uniqueUsers) {
                     let count = 0;
                     let isShow = "";
+                    $.each(res.map, function (item, num) {
+                        if (item && item == user.id.toString()) {
+                            count = Number(num) > 99 ? 99 : Number(num);
+                            isShow = `style="display:inline;"`;
+                            if (ids.indexOf(user.id.toString()) == -1) {
+                                ids.push(user.id.toString());
+
+                            }
+                        }
+                    })
                     if (user.id != userId) {
                         // 组织好友列表
                         friendList += `<li class="friend-li" onclick='chatWith("${user.id}","${user.username}",this);'>
