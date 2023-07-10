@@ -29,8 +29,17 @@
 			<span class="min_hide" title="最小化">一</span>
 			<span class="close" title="关闭">X</span>
 		</div>
+
 		<div class="friend-list">
 			<ul class="friend-ul"></ul>
+<!--			<a href="#" onclick="getUserList()">-->
+<!--				<img src="/imgs/addMember.png" alt="Icon" style="width:20px;height:20px;position:relative;left:5px;">   <span  style="background-color: white; color: black;">新朋友  ></span>-->
+<!--			</a>-->
+			<button id="getUserList" onclick="getUserList()" style="background-color: transparent; border: none;">
+				<img src="/imgs/addMember.png" alt="Button Image" style="width:20px;height:20px;position:relative;left:5px; ">
+				<span  style="font-size: 16px;">&nbsp&nbsp新朋友&nbsp&nbsp></span>
+			</button>
+			<div id="dropdown-container" ></div>
 		</div>
 
 		<div class="chat-main" id="chat-container">
@@ -38,6 +47,7 @@
 		</div>
 		<div class="sys-msg">
 			<span>系统消息</span>
+			<span class="blink"><img src="/imgs/ExclamationMark.png" alt="ExclamationMark" style="width:20px;height:20px;position:relative;float: right;"></span>
 			<ul class="sys-msg-ul">
 			</ul>
 		</div>
@@ -75,7 +85,6 @@
 
 	chatContainer.addEventListener("scroll", function() {
 		if (chatContainer.scrollTop === 0) {
-			console.log("测试测试");
 			getHistoryChatMessage();
 		}
 	});

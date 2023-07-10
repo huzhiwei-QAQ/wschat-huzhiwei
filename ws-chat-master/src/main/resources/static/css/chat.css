@@ -312,3 +312,27 @@ input[type="file"] {
 	border-radius: 4px;
 	cursor: pointer;
 }
+
+
+
+#dropdown-container {
+	/*position: fixed;*/
+	/* 或者 */
+	position: absolute;
+	margin-left:10px;
+	margin-top: 5px;
+	/* 根据需要添加其他样式属性 */
+}
+
+
+@keyframes blink {
+	0% {opacity: 1;}
+	50% {opacity: 0;}
+	100% {opacity: 1;}
+}
+
+.blink {
+	animation: blink 1s infinite;
+}
+
+

@@ -1,16 +1,9 @@
 package cn.molu.app.pojo;
 
-import com.baomidou.mybatisplus.annotation.TableName;
-
 import java.util.Date;
-import java.io.Serializable;
 
-/**
- * (User)实体类
- *
- */
-@TableName("tb_user")
-public class User implements Serializable {
+public class UserQuery {
+
     private static final long serialVersionUID = 477020946096486016L;
     /**
      * 用户id
@@ -58,9 +51,13 @@ public class User implements Serializable {
      */
     private String mailbox;
 
+    private Integer pageNum;
 
+    private Integer pageSize;
 
+    private String orderByField;
 
+    private boolean isAsc;
 
     public Integer getId() {
         return id;
@@ -142,7 +139,6 @@ public class User implements Serializable {
         this.updated = updated;
     }
 
-
     public String getMailbox() {
         return mailbox;
     }
@@ -151,21 +147,35 @@ public class User implements Serializable {
         this.mailbox = mailbox;
     }
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", username='" + username + '\'' +
-                ", phone='" + phone + '\'' +
-                ", password='" + password + '\'' +
-                ", deleted='" + deleted + '\'' +
-                ", state='" + state + '\'' +
-                ", type='" + type + '\'' +
-                ", userCode='" + userCode + '\'' +
-                ", created=" + created +
-                ", updated=" + updated +
-                ", mailbox='" + mailbox + '\'' +
-                '}';
+    public Integer getPageNum() {
+        return pageNum;
+    }
+
+    public void setPageNum(Integer pageNum) {
+        this.pageNum = pageNum;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    public String getOrderByField() {
+        return orderByField;
+    }
+
+    public void setOrderByField(String orderByField) {
+        this.orderByField = orderByField;
+    }
+
+    public boolean isAsc() {
+        return isAsc;
+    }
+
+    public void setAsc(boolean asc) {
+        isAsc = asc;
     }
 }
-

@@ -11,4 +11,42 @@
         WHERE
             a.id = #{userId}
     </select>
+    <select id="selectByPhone" resultType="cn.molu.app.pojo.User" parameterType="string">
+        select * from tb_user where phone=#{phonenumber}
+    </select>
+
+    <select id="selectCount" resultType="java.lang.Integer">
+        select count(1) from tb_user
+    </select>
+
+    <select id="selctAllUser" resultType="cn.molu.app.pojo.User" parameterType="cn.molu.app.pojo.UserQuery">
+        select * from tb_user where id not in(
+            SELECT
+                c.id
+            FROM
+                tb_user a
+                    INNER JOIN tb_friends b ON a.id = b.user_id
+                    INNER JOIN tb_user c ON b.friend_id = c.id
+            WHERE
+                a.id = #{id}
+            )
+        and id <![CDATA[ <>]]> #{id}
+    </select>
+
+    <select id="queryAlreadyFriend" resultType="java.util.Map">
+        SELECT
+            *
+        FROM
+            tb_friends
+        WHERE
+            (user_id = #{userId} AND friend_id = #{friendId})
+           OR
+            (user_id = #{friendId} AND friend_id =#{userId})
+    </select>
+
+
+    <delete id="deleteRelationship" parameterType="Integer">
+        delete from tb_friends where id=#{id}
+    </delete>
+
 </mapper>

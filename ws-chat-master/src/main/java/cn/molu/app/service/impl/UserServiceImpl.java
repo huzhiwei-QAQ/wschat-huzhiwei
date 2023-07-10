@@ -4,21 +4,30 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
+import cn.hutool.core.map.MapUtil;
 import cn.molu.app.mapper.UserMapper;
+import cn.molu.app.pojo.Email;
 import cn.molu.app.pojo.User;
+import cn.molu.app.pojo.UserQuery;
 import cn.molu.app.service.UserService;
+import cn.molu.app.utils.MailUtils;
 import cn.molu.app.utils.ObjectUtils;
 import cn.molu.app.utils.RedisUtils;
 import cn.molu.app.vo.R;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -47,6 +56,9 @@ public class UserServiceImpl implements UserService {
 
     @Value("${jwt.secret}")
     private String secret;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @Override
     public R login(String phone, String password, Map<String, Object> params, HttpServletResponse res) {
@@ -138,5 +150,102 @@ public class UserServiceImpl implements UserService {
     public List<User> queryFriendsList(User user) {
         List<User> userList=  userMapper.queryFriendsList(user.getId());
         return userList;
+    }
+
+    @Override
+    public void sendVerificationCode(String mailbox) {
+        StringBuilder str = new StringBuilder();
+        Random random = new Random();
+        for (int i = 0; i < 6; i++) {
+            str.append(random.nextInt(10));
+        }
+        Email mail = new Email();
+        //发件人邮箱地址
+        mail.setSender("huzhiwe1@163.com");
+        //邮箱账号
+        mail.setUserName("huzhiwe1");
+        //邮箱客户端授权码
+        mail.setPassword("1733296693qaz");
+
+        mail.setSubject("用户注册");
+
+        mail.setMessage("<p>尊敬的用户：</p><p>您好!</p><p>您正在尝试注册wsChat账号！"
+                +"您的验证码是："+str+"，有效期10分钟。</p><p>请妥善保管您的账号和密码。</p>");
+
+        mail.setReceiver(mailbox);
+
+        MailUtils.sendMail(mail);
+
+        redisTemplate.opsForValue().set(mailbox,str,10,TimeUnit.MINUTES);
+    }
+
+    @Override
+    public R  registerUser(String username, String phonenumber, String pwd, String verify, String mailbox) {
+       if( redisTemplate.opsForValue().get(mailbox)==null){
+           return R.err("验证码失效");
+       }
+        if(!redisTemplate.opsForValue().get(mailbox).toString().equals(verify)){
+            return R.err("验证码错误");
+        }
+        User userSelct=userMapper.selectByPhone(phonenumber);
+        if(userSelct!=null){
+            return R.err("用户已存在");
+        }
+
+        User user=new User();
+        user.setUsername(username);
+        user.setPhone(phonenumber);
+        user.setPassword(DigestUtils.md5Hex(secret + pwd));
+        user.setMailbox(mailbox);
+        user.setUserCode(String.valueOf(userMapper.selectCount()+1));
+        userMapper.insert(user);
+        return R.ok("注册成功");
+    }
+
+    @Override
+    public R getUserList( UserQuery userQuery) {
+        String sort=null;
+        if(userQuery.isAsc()){
+            sort="asc";
+        }else {
+            sort="desc";
+        }
+        String orderBy= userQuery.getOrderByField()+" "+sort;
+        PageHelper.startPage(userQuery.getPageNum(),userQuery.getPageSize(),orderBy);
+         List<User> userList= userMapper.selctAllUser(userQuery);
+        PageInfo<User> pageInfo=new PageInfo<>(userList);
+        return R.ok(pageInfo);
+
+    }
+
+    @Override
+    public R addUser(Map map) {
+        Integer userId=null;
+        Integer friendId=null;
+         if(MapUtil.isNotEmpty(map)&&map.get("userId")!=null){
+            userId=Integer.valueOf(map.get("userId").toString());
+         }
+        if(MapUtil.isNotEmpty(map)&&map.get("friendId")!=null){
+            friendId=Integer.valueOf(map.get("friendId").toString());
+        }
+        if(userId!=null&&friendId!=null){
+          List <Map> list=userMapper.queryAlreadyFriend(userId,friendId);
+          if(list.size()==2){
+              return R.err("已是好友！！！，请勿重复添加");
+          }
+            if(list.size()==1){
+                userMapper.deleteRelationship(Integer.valueOf(list.get(0).get("id").toString()));
+                return R.err("数据有误，请重试");
+            }
+            if(list.size()==0){
+                User user = userMapper.selectById(friendId);
+                return R.ok(user);
+            }
+
+        }
+
+
+
+        return null;
     }
 }

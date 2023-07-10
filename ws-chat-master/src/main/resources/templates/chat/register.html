@@ -1,0 +1,205 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户注册界面</title>
+    <script src="/js/jquery.js" ></script>
+    <style>
+        body{
+            background: #159f9f;
+        }
+        .container{
+            margin: 0 auto;
+            width: 500px;
+        }
+        form{
+            width: 450px;
+            margin: 0 auto;
+            background: #FFF;
+            border-radius: 15px;
+            position: relative;
+        }
+        h1{
+            font-size: 28px;
+            text-align: center;
+            color: #FFF;
+        }
+        .p{
+            color: red;
+            margin-left: 33px;
+            display: inline-block;//不占单独一行的块级元素
+        }
+        label{
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .register{
+            height: 35px;
+            width: 300px;
+        }
+        .q{
+            color:red;
+            margin-left:17px;
+            display:inline-block;
+        }
+        .checkbox{
+            margin-left: 100px;
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+        }
+        .submit{
+            border-radius: 7px;
+            margin-left: 150px;
+            height: 35px;
+            width: 150px;
+            background-color: #000;
+            border: none;
+            display: block;
+            padding: 0;
+            color: #FFF;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        a{
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .left,.right{
+            position: absolute;
+            bottom: 20px;
+        }
+        .left{
+            left: 20px;
+        }
+        .right{
+            right: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>新用户注册</h1>
+    <form action="/user/registerUser" method="post" id="registerUser">
+        <br>
+        <span class="p">*</span>
+        <label for="username">用户名</label>
+        <input type="text" name="username" id="username" placeholder="" class="register">
+        <br><br>
+        <span class="p">*</span>
+        <label for="phonenumber">手机号</label>
+        <input type="text" name="phonenumber" id="phonenumber" class="register">
+        <br><br>
+        <span class="q">*</span>
+        <label for="mailbox">您的邮箱</label>
+        <input type="text" name="mailbox" id="mailbox" class="register">
+        <br><br>
+        <span class="q">*</span>
+        <label for="pwd">登录密码</label>
+        <input type="password" name="pwd" id="pwd" class="register">
+        <br><br>
+        <span class="q">*</span>
+        <label for="c_pwd">确认密码</label>
+        <input type="password" name="c_pwd" id="c_pwd" class="register">
+        <br><br>
+        <span class="p">*</span>
+        <label for="verify">验证码</label>
+        <input type="text" name="verify" id="verify"  class="register" placeholder="请输入手机验证码">
+        <button class="btn_send_code" id="sendCodeButton" style="display: block;margin: 0 auto;">发送验证码</button>
+        <br><br>
+        <input type="submit" name="" value="注册" class="submit" disabled><br>
+        <a href="/" class="left">返回首页</a>
+    </form>
+</div>
+<script>
+    document.getElementById("sendCodeButton").addEventListener("click", function(event) {
+        event.preventDefault(); // 阻止表单提交
+        // 从输入字段中获取值
+        var mailbox = document.getElementById("mailbox").value;
+
+        if (!mailbox) {
+            alert("请输入正确的邮箱!");
+            return false;
+        }
+        // 创建一个包含要发送的数据的对象
+        var data = {
+            mailbox: mailbox
+        };
+
+        // 发起AJAX请求
+        fetch("/user/sendVerificationCode", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        })
+            .then(function(response) {
+                if (response.ok) {
+                    // 验证码发送成功
+                    alert("验证码已发送！");
+                    // 如果需要，你可以从响应中提取验证码，并更新"验证码"输入字段的HTML
+                } else {
+                    // 发送验证码时出错
+                    alert("发送验证码时出错，请重试。");
+                }
+            })
+            .catch(function(error) {
+                console.log(error);
+                alert("发生错误，请稍后重试。");
+            });
+    });
+
+    //判断两次密码是否一致
+    const confirmPasswordInput = document.getElementById("c_pwd");
+    confirmPasswordInput.addEventListener("blur", function() {
+        const password = document.getElementById("pwd").value;
+        const confirmPassword = confirmPasswordInput.value;
+
+        if (password === confirmPassword) {
+            console.log("一致")
+            document.querySelector('.submit').removeAttribute('disabled');
+        } else {
+            alert("两次密码输入不一致！！！");
+        }
+    });
+
+    //判断各参数是否正确填写,并提交
+    document.querySelector('.submit').addEventListener('click', function(event) {
+        event.preventDefault(); // Prevent form submission
+
+        var username = document.getElementById('username').value;
+        var phoneNumber = document.getElementById('phonenumber').value;
+        var email = document.getElementById('mailbox').value;
+        var password = document.getElementById('pwd').value;
+
+        if (username === '' || phoneNumber === '' || email === '' || password === '') {
+            alert("用户名，手机号，邮箱，密码不可为空");
+        } else {
+            var formData = new FormData(document.getElementById('registerUser'));
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/user/registerUser');
+            xhr.send(formData);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        var response = xhr.responseText;
+                        var message = JSON.parse(response);
+                        console.log(message);
+                        if (message.code==200) {
+                            alert(message.msg);
+                        } else {
+                            alert("注册失败，请联系管理员！" + message.msg);
+                        }
+                    } else {
+                        alert("注册失败，请联系管理员！");
+                    }
+                }
+            };
+
+        }
+
+    });
+</script>
+</body>
+</html>

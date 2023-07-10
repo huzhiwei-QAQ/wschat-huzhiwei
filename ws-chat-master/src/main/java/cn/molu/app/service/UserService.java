@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import cn.molu.app.pojo.User;
+import cn.molu.app.pojo.UserQuery;
 import cn.molu.app.vo.R;
 
 /**
@@ -27,4 +28,13 @@ public interface UserService {
     String getToken(User user) throws Exception;
 
     List<User> queryFriendsList(User user);
+
+    void sendVerificationCode(String mailbox);
+
+    R registerUser(String username, String phonenumber, String pwd, String verify, String mailbox);
+
+    R getUserList( UserQuery userQuery);
+
+    R addUser(Map map);
+
 }

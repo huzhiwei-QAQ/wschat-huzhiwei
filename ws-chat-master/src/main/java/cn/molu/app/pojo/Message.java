@@ -41,6 +41,8 @@ public class Message {
     /**
      * 接收到消息的日期时间
      */
+
+    private Integer messageType;
     private String dateStr = dateFormat(new Date());
 
     public String getDateStr() {
@@ -138,6 +140,14 @@ public class Message {
         this.message = message;
     }
 
+    public Integer getMessageType() {
+        return messageType;
+    }
+
+    public void setMessageType(Integer messageType) {
+        this.messageType = messageType;
+    }
+
     @Override
     public String toString() {
         return "Message{" +
@@ -148,6 +158,7 @@ public class Message {
                 ", toId='" + toId + '\'' +
                 ", message='" + message + '\'' +
                 ", count=" + count +
+                ", messageType=" + messageType +
                 ", dateStr='" + dateStr + '\'' +
                 '}';
     }

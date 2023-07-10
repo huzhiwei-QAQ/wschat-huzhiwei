@@ -160,34 +160,6 @@ async function message(event) {
     if (res.systemMsgFlag) {
         //为系统消息则：1. 好友列表展示   2. 系统推广
         let allUser = res.message;// name = username_userId
-        for (let user of allUser) {
-            let count = 0;
-            let isShow = "";
-            $.each(res.map, function (item, num) {
-                if (item && item == user.userId) {
-                    count = Number(num) > 99 ? 99 : Number(num);
-                    isShow = `style="display:inline;"`;
-                    if (ids.indexOf(user.userId) == -1) {
-                        ids.push(user.userId);
-                    }
-                }
-            })
-            if (user.userId != userId) {
-                // 组织好友列表
-                friendList += `<li class="friend-li" onclick='chatWith("${user.userId}","${user.username}",this);'>
-								<span><img class="friend-img" src="${imgUrl}"/></span>
-								<span>${user.username}</span>
-								<span class="msg-count msg-count-${user.userId}" ${isShow} title="${count}条信息未读">${count}</span>
-							</li>`;
-                // 组织系统通知
-                sysMsg += `<li class="sys-msg-li" style="color:#9d9d9d;font-family:宋体;">
-						 	<span style="font-size:5px;color:#999;">${user.dateStr}</span><br/>
-						 	<span>好友<font style="color:blue;">${user.username}</font>上线了</span>
-						 </li>`;
-                tips("sendMsg", `用户：${user.username}上线了`);
-            }
-        }
-        // let friends;
         const data = {id: userId};
         await fetch("/user/queryFriendsList", {
             method: "POST",
@@ -198,45 +170,69 @@ async function message(event) {
         }).then(response => response.json()).then(data => {
             if (data.code == 200) {
                 let    friends = data.data;
-                const uniqueUsers = [];
+
 
                 // 遍历friends中的每个用户
                 for (let i = 0; i < friends.length; i++) {
                     let isDuplicate = false;
-
+                    let uniqueUser;
                     // 检查当前用户的姓名是否在allUser中
                     for (let j = 0; j < allUser.length; j++) {
                         if (friends[i].id == allUser[j].userId) {
                             isDuplicate = true;
+                            uniqueUser=allUser[j];
                             break;
                         }
                     }
                     // 如果用户的姓名不是重复的，将其添加到uniqueUsers数组中
-                    if (!isDuplicate) {
-                        uniqueUsers.push(friends[i]);
-                    }
-                }
+                    if (isDuplicate) {
 
-                for (let user of uniqueUsers) {
-                    let count = 0;
-                    let isShow = "";
-                    $.each(res.map, function (item, num) {
-                        if (item && item == user.id.toString()) {
-                            count = Number(num) > 99 ? 99 : Number(num);
-                            isShow = `style="display:inline;"`;
-                            if (ids.indexOf(user.id.toString()) == -1) {
-                                ids.push(user.id.toString());
-
+                        let count = 0;
+                        let isShow = "";
+                        $.each(res.map, function (item, num) {
+                            if (item && item == friends[i].id) {
+                                count = Number(num) > 99 ? 99 : Number(num);
+                                isShow = `style="display:inline;"`;
+                                if (ids.indexOf(friends[i].id) == -1) {
+                                    ids.push(friends[i].id);
+                                }
                             }
-                        }
-                    })
-                    if (user.id != userId) {
-                        // 组织好友列表
-                        friendList += `<li class="friend-li" onclick='chatWith("${user.id}","${user.username}",this);'>
-								<span><img style="filter: grayscale(100%) opacity(40%);" class="friend-img" src="${imgUrl}"/></span>
-								<span>${user.username}</span>
-								<span class="msg-count msg-count-${user.id}" ${isShow} title="${count}条信息未读">${count}</span>
+                        })
+                        if (friends[i].id != userId) {
+                            // 组织好友列表
+                            friendList += `<li class="friend-li" onclick='chatWith("${friends[i].id}","${friends[i].username}",this);'>
+								<span><img class="friend-img" src="${imgUrl}"/></span>
+								<span>${friends[i].username}</span>
+								<span class="msg-count msg-count-${friends[i].id}" ${isShow} title="${count}条信息未读">${count}</span>
 							</li>`;
+                            // 组织系统通知
+                            sysMsg += `<li class="sys-msg-li" style="color:#9d9d9d;font-family:宋体;">
+						 	<span style="font-size:5px;color:#999;">${uniqueUser.dateStr}</span><br/>
+						 	<span>好友<font style="color:blue;">${friends[i].username}</font>上线了</span>
+						 </li>`;
+                            tips("sendMsg", `用户：${friends[i].username}上线了`);
+                        }
+                    }else {
+                        let count = 0;
+                        let isShow = "";
+                        $.each(res.map, function (item, num) {
+                            if (item && item == friends[i].id.toString()) {
+                                count = Number(num) > 99 ? 99 : Number(num);
+                                isShow = `style="display:inline;"`;
+                                if (ids.indexOf(friends[i].id.toString()) == -1) {
+                                    ids.push(friends[i].id.toString());
+
+                                }
+                            }
+                        })
+                        if (friends[i].id != userId) {
+                            // 组织好友列表
+                            friendList += `<li class="friend-li" onclick='chatWith("${friends[i].id}","${friends[i].username}",this);'>
+								<span><img style="filter: grayscale(100%) opacity(40%);" class="friend-img" src="${imgUrl}"/></span>
+								<span>${friends[i].username}</span>
+								<span class="msg-count msg-count-${friends[i].id}" ${isShow} title="${count}条信息未读">${count}</span>
+							</li>`;
+                        }
                     }
                 }
             }
@@ -250,41 +246,38 @@ async function message(event) {
         $(".sys-msg-ul").html(sysMsg);
         // 不是系统消息
     } else {
-        let contextMsg = res.message;
-        let chatMsg = `<li class="friend-msg-li">
+      if(res.messageType==1){
+          let contextMsg = res.message;
+          let chatMsg = `<li class="friend-msg-li">
 						<span><img class="friend-msg-img" src="${imgUrl}" /></span>
 						<span class="friend-msg-span">${contextMsg}</span>
 					</li>`;
-        if (!currenChattUser.id || currenChattUser.id != res.fromId) {
-            let count = Number($(".msg-count-" + res.fromId).text());
-            if (!count || count == NaN) {
-                count = 0;
-            }
-            unReadMsgUser.id = res.fromId;
-            $.post("/index/setCount", {fromId: res.fromId, userId: userId, count: count}, function (resData) {
-                if (resData.flag) {
-                    count = resData.data > 99 ? 99 : resData.data;
-                    currenChattUser.count = count;
-                    unReadMsgUser.count = count;
-                    $(".msg-count-" + res.fromId).text(count);
-                    $(".msg-count-" + res.fromId).show();
-                    $(".msg-count-" + res.fromId).attr("title", count + "条信息未读");
-                }
-            }).catch(function (err) {
-                console.log(err);
-            })
-        }
-        if (toId === res.fromId) {
-            $(".chating-main-msg").append(chatMsg);
-        }
-        scrollIntoView();
-        // 获取 sessionStorage 中存放的系统缓存消息
-        // let chatData = sessionStorage.getItem(res.fromId);
-        // if (chatData) {
-        //     chatMsg = chatData + chatMsg;
-        // }
-        // // 将系统消息存放到 sessionStorage 中
-        // sessionStorage.setItem(res.fromId, chatMsg);
+          if (!currenChattUser.id || currenChattUser.id != res.fromId) {
+              let count = Number($(".msg-count-" + res.fromId).text());
+              if (!count || count == NaN) {
+                  count = 0;
+              }
+              unReadMsgUser.id = res.fromId;
+              $.post("/index/setCount", {fromId: res.fromId, userId: userId, count: count}, function (resData) {
+                  if (resData.flag) {
+                      count = resData.data > 99 ? 99 : resData.data;
+                      currenChattUser.count = count;
+                      unReadMsgUser.count = count;
+                      $(".msg-count-" + res.fromId).text(count);
+                      $(".msg-count-" + res.fromId).show();
+                      $(".msg-count-" + res.fromId).attr("title", count + "条信息未读");
+                  }
+              }).catch(function (err) {
+                  console.log(err);
+              })
+          }
+          if (toId === res.fromId) {
+              $(".chating-main-msg").append(chatMsg);
+          }
+          scrollIntoView();
+      }else if(res.messageType==0){
+          console.log("hhhhhhhhhhhhhhh")
+      }
     }
 }
 
@@ -707,4 +700,102 @@ function timeTip(msg) {
     if (!$("#documentDiv").hasClass("tipsDiv")) {
         $("body").append(html);
     }
+}
+
+// const button = document.getElementById('getUserList');
+// button.addEventListener('click', getUserList);
+
+function getUserList(){
+
+    const data = {pageNum:1,pageSize:100,isAsc:false,orderByField:"created",id:userId};
+    fetch("/user/getUserList", {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body:JSON.stringify(data)
+    }).then(response => response.json()).then(data => {
+        if(data.code==200){
+            console.log(data.data.list);
+
+            const dropdownList = document.createElement('select');
+            data.data.list.forEach(user => {
+
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.text = user.username;
+                dropdownList.appendChild(option);
+
+            });
+
+            dropdownList.style.fontSize='16px';
+            dropdownList.style.width='100px';
+            dropdownList.style.maxHeight='200px';
+            dropdownList.style.overflowY='auto';
+            dropdownList.className='dropdownList';
+
+            const dropdownContainer = document.getElementById('dropdown-container');
+            dropdownContainer.appendChild(dropdownList);
+            dropdownContainer.style.display = 'block';
+            document.getElementById("getUserList").style.display = "none";
+
+
+            const button = document.createElement('button');
+            button.textContent = '添加';
+            button.className='dropdown-button';
+            dropdownContainer.appendChild(button);
+            button.addEventListener('click', addUser);
+        }
+
+    }).catch(error => {
+        console.error(error);
+    });
+
+    document.addEventListener('click', function(event) {
+        const dropdownContainer = document.getElementById('dropdown-container');
+        const clickedElement = event.target;
+
+        // Check if the clicked element is outside the dropdown container
+        if (!dropdownContainer.contains(clickedElement)) {
+            // Hide the dropdown
+            dropdownContainer.style.display = 'none';
+
+            // Clear the dropdown content
+            dropdownContainer.innerHTML = '';
+
+            document.getElementById("getUserList").style.display = "block";
+
+        }
+    });
+
+
+    function addUser(){
+        const dropdownList = document.getElementsByClassName('dropdownList')[0];
+        const selectedValue = dropdownList.value;
+        const data = {userId:userId,friendId:selectedValue};
+         fetch("/user/addUser", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        }).then(response => response.json()).then(data => {
+            console.log(data);
+            if(data.code==200){
+                let jsonMessage = {
+                    "fromName": username, //消息发送人姓名
+                    "fromId": userId, //消息发送人id
+                    "toName": data.data.username, //消息接收人姓名
+                    "toId": data.data.id, //消息接收人id
+                    "message": "添加好友请求", //发送的消息内容
+                    "messageType":0
+                };
+                // 发送数据给服务器
+                webSocket.send(JSON.stringify(jsonMessage));
+            }
+        }).catch(error => {
+            console.error(error);
+        });
+        }
+
 }

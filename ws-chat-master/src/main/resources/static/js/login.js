@@ -90,7 +90,8 @@ function changeValue() {
 }
 
 function registerAcc() {
-    ml.tips("注册功能暂未开放使用", "register");
+    // ml.tips("注册功能暂未开放使用", "register");
+    location.href =`/user/register`;
 }
 
 

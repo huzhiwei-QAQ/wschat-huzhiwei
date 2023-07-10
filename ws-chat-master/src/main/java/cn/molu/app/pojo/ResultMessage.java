@@ -49,6 +49,8 @@ public class ResultMessage {
      */
     private Map<?, ?> map;
 
+    private Integer messageType;
+
     public Map<?, ?> getMap() {
         return map;
     }
@@ -150,6 +152,14 @@ public class ResultMessage {
         super();
     }
 
+    public Integer getMessageType() {
+        return messageType;
+    }
+
+    public void setMessageType(Integer messageType) {
+        this.messageType = messageType;
+    }
+
     @Override
     public String toString() {
         return "ResultMessage{" +
@@ -162,6 +172,7 @@ public class ResultMessage {
                 ", message=" + message +
                 ", dateStr='" + dateStr + '\'' +
                 ", map=" + map +
+                ", messageType=" + messageType +
                 '}';
     }
 

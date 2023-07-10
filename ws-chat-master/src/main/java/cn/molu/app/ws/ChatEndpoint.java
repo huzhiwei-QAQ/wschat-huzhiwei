@@ -171,52 +171,68 @@ public class ChatEndpoint {
         String toId = msgObj.getToId();
         String text = msgObj.getMessage();
         msgObj.setDateStr(new Date());
-        if (ObjectUtils.isBlank(toId)) {
-            Map<String, String> map = new HashMap<>(2);
-            map.put("sendErr", "消息发送失败，请稍后重试。。。");
-            ObjectMapper objectMapper = new ObjectMapper();
-            Session toSession = onLineUser.get(msgObj.getFromId());
-            LOGGER.info("session对比{}，{}。。。", toSession.getId(), session.getId());
-            if (toSession != null && toSession.isOpen()) {
-                Basic basicRemote = toSession.getBasicRemote();
-                basicRemote.sendText(objectMapper.writeValueAsString(map));
-                LOGGER.info(objectMapper.writeValueAsString(map));
-                return;
-            }
-        }
-        // 获取推送指定用户数据
-        String resultMessage = getMessage(msgObj, text);
-        LOGGER.info("接收到好友发来的数据：{}", resultMessage);
+        Integer messageType=msgObj.getMessageType();
+        if(messageType!=null&&messageType==0){
+            // 获取推送指定用户数据
+            String resultMessage = getMessage(msgObj, text);
+            LOGGER.info("接收到好友发来的数据：{}", resultMessage);
 
-        //储存发送的聊天记录
-        AddMessageRunnable addMessageRunnable=new AddMessageRunnable(JSON.parseObject(resultMessage, ResultMessage.class),messageService);
-        threadPoolExecutor.execute(addMessageRunnable);
-
-        // 点对点发送数据（给指定用户发送消息）
-        Session toSession = onLineUser.get(toId);
-        if (toSession != null) {
-            if (toSession.isOpen()) {
+            Session toSession = onLineUser.get(toId);
+            if(toSession!=null){
                 Basic basicRemote = toSession.getBasicRemote();
                 basicRemote.sendText(resultMessage);
+            }else {
+
             }
         }else {
-            //发送离线消息，记录未读消息条数
-            String fromId = msgObj.getFromId();
-            String userId = msgObj.getToId();
-            if (StringUtils.isNotBlank(fromId) && StringUtils.isNotBlank(userId)) {
-                try {
-                    String redisCountKey = "UN_READ_MSG_COUNT_" + fromId + "_" + userId;
-                    String count = this.redisUtils.getStr(redisCountKey);
-                    if(StringUtils.isBlank(count)){
-                        count="1";
-                    }else {
-                        count = ObjectUtils.getStr(Integer.parseInt(count) + 1);
+            if (ObjectUtils.isBlank(toId)) {
+                Map<String, String> map = new HashMap<>(2);
+                map.put("sendErr", "消息发送失败，请稍后重试。。。");
+                ObjectMapper objectMapper = new ObjectMapper();
+                Session toSession = onLineUser.get(msgObj.getFromId());
+                LOGGER.info("session对比{}，{}。。。", toSession.getId(), session.getId());
+                if (toSession != null && toSession.isOpen()) {
+                    Basic basicRemote = toSession.getBasicRemote();
+                    basicRemote.sendText(objectMapper.writeValueAsString(map));
+                    LOGGER.info(objectMapper.writeValueAsString(map));
+                    return;
+                }
+            }
+            // 获取推送指定用户数据
+            String resultMessage = getMessage(msgObj, text);
+            LOGGER.info("接收到好友发来的数据：{}", resultMessage);
+
+
+            //储存发送的聊天记录
+            AddMessageRunnable addMessageRunnable=new AddMessageRunnable(JSON.parseObject(resultMessage, ResultMessage.class),messageService);
+            threadPoolExecutor.execute(addMessageRunnable);
+
+            // 点对点发送数据（给指定用户发送消息）
+            Session toSession = onLineUser.get(toId);
+            if (toSession != null) {
+                if (toSession.isOpen()) {
+                    Basic basicRemote = toSession.getBasicRemote();
+                    basicRemote.sendText(resultMessage);
+                }
+            }else {
+                //发送离线消息，记录未读消息条数
+                String fromId = msgObj.getFromId();
+                String userId = msgObj.getToId();
+                if (StringUtils.isNotBlank(fromId) && StringUtils.isNotBlank(userId)) {
+                    try {
+                        String redisCountKey = "UN_READ_MSG_COUNT_" + fromId + "_" + userId;
+                        String count = this.redisUtils.getStr(redisCountKey);
+                        if(StringUtils.isBlank(count)){
+                            count="1";
+                        }else {
+                            count = ObjectUtils.getStr(Integer.parseInt(count) + 1);
+                        }
+                        this.redisUtils.setStr(redisCountKey, count, Duration.ofDays(7));
+                        LOGGER.info("获取未读消息条数:{}...{}", count, redisCountKey);
+                    } catch (Exception e) {
+                        LOGGER.info("获取未读消息时出现异常...{}", e.getMessage());
+                        e.printStackTrace();
                     }
-                    this.redisUtils.setStr(redisCountKey, count, Duration.ofDays(7));
-                    LOGGER.info("获取未读消息条数:{}...{}", count, redisCountKey);
-                } catch (Exception e) {
-                    LOGGER.info("获取未读消息时出现异常...{}", e.getMessage());
-                    e.printStackTrace();
                 }
             }
         }
@@ -317,6 +333,7 @@ public class ChatEndpoint {
         resultMessage.setToName(msgData.getToName());
         resultMessage.setMessage(message);
         resultMessage.setDateStr(new Date());
+        resultMessage.setMessageType(msgData.getMessageType()!=null?msgData.getMessageType():1);
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             return objectMapper.writeValueAsString(resultMessage);
