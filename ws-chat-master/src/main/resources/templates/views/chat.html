@@ -47,7 +47,12 @@
 		</div>
 		<div class="sys-msg">
 			<span>系统消息</span>
-			<span class="blink"><img src="/imgs/ExclamationMark.png" alt="ExclamationMark" style="width:20px;height:20px;position:relative;float: right;"></span>
+			<span id="notification" class="blink" style="display: none;"><img src="/imgs/ExclamationMark.png" alt="ExclamationMark" style="width:20px;height:20px;position:relative;float: right;"></span>
+			<div id="alertBox" style="display: none;">
+				<p id="alertMessage"></p>
+				<button id="agreeButton">同意</button>
+				<button id="rejectButton">拒绝</button>
+			</div>
 			<ul class="sys-msg-ul">
 			</ul>
 		</div>
@@ -87,6 +92,67 @@
 		if (chatContainer.scrollTop === 0) {
 			getHistoryChatMessage();
 		}
+	});
+
+
+	window.onload=function(){
+		$.post("/user/queryAddUserMessage", {userId:userId}, function (resData) {
+			if (resData.code==200) {
+				if(resData.data.length>0){
+					var notificationElement = document.getElementById('notification');
+					notificationElement.style.display = "inline";
+				}
+			}
+		}).catch(function (err) {
+			console.log(err);
+		})
+	}
+
+	document.getElementById('notification').addEventListener('click', function() {
+		const data = {id:userId};
+		fetch("/user/queryAddUserMessageOne",{
+			method: "POST",
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(data)
+		})
+				.then(response => response.json())
+				.then(data => {
+					// Display data in alert box
+					document.getElementById('alertMessage').style.color = 'blue';
+					document.getElementById('alertMessage').textContent ="来自"+data.data.fromName+"的"+data.data.message;
+					document.getElementById('alertBox').style.display = 'block';
+				});
+	});
+
+	document.getElementById('agreeButton').addEventListener('click', async function () {
+
+		const data = {id: userId};
+		await fetch("/user/deleAddUserMessage", {
+			method: "POST",
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(data)
+		}).then(response => response.json())
+				.then(data => {
+					if (data.code == 200) {
+						// Handle agree action here
+						document.getElementById('notification').style.display = 'none';
+						document.getElementById('alertBox').style.display = 'none';
+						alert("添加好友成功");
+						reconnect();
+					}
+				});
+
+
+	});
+
+	document.getElementById('rejectButton').addEventListener('click', function() {
+		// Handle reject action here
+		document.getElementById('alertBox').style.display = 'none';
+		document.getElementById('notification').style.display = 'none';
 	});
 </script>
 </html>

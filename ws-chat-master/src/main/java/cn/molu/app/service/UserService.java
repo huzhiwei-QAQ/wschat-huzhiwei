@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import cn.molu.app.pojo.Message;
 import cn.molu.app.pojo.User;
 import cn.molu.app.pojo.UserQuery;
 import cn.molu.app.vo.R;
@@ -37,4 +38,11 @@ public interface UserService {
 
     R addUser(Map map);
 
+    R addUserMessage(Message message);
+
+    R queryAddUserMessage(String userId);
+
+    R queryAddUserMessageOne(String userId);
+
+    R deleAddUserMessage(String userId);
 }

@@ -1,5 +1,6 @@
 package cn.molu.app.controller;
 
+import cn.molu.app.pojo.Message;
 import cn.molu.app.pojo.User;
 import cn.molu.app.pojo.UserQuery;
 import cn.molu.app.service.UserService;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -59,4 +61,30 @@ public class UserController {
    public R addUser(@RequestBody Map map){
         return userService.addUser(map);
    }
+
+    @PostMapping("/addUserMessage")
+   public R addUserMessage(HttpServletRequest req){
+        Message message=new Message();
+        message.setMessage(req.getParameter("message"));
+        message.setFromId(req.getParameter("fromId"));
+        message.setFromName(req.getParameter("fromName"));
+        message.setToId(req.getParameter("toId"));
+        message.setToName(req.getParameter("toName"));
+        return userService.addUserMessage(message);
+   }
+
+    @PostMapping("/queryAddUserMessage")
+   public R queryAddUserMessage(HttpServletRequest req){
+        return userService.queryAddUserMessage(req.getParameter("userId"));
+    }
+
+    @PostMapping("/queryAddUserMessageOne")
+    public R queryAddUserMessageOne(@RequestBody User user){
+        return userService.queryAddUserMessageOne(String.valueOf(user.getId()));
+    }
+
+    @PostMapping("/deleAddUserMessage")
+    public R deleAddUserMessage(@RequestBody User user){
+        return userService.deleAddUserMessage(String.valueOf(user.getId()));
+    }
 }

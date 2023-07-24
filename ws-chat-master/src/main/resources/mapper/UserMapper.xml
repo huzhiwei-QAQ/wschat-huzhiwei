@@ -49,4 +49,12 @@
         delete from tb_friends where id=#{id}
     </delete>
 
+    <insert id="addFriendRelationShip" parameterType="list">
+        insert into
+        tb_friends (user_id,friend_id)
+        values
+        <foreach collection="list" item="item" separator="," index="">
+            (#{item.userId},#{item.friendId})
+        </foreach>
+    </insert>
 </mapper>

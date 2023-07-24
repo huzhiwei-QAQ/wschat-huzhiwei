@@ -1,10 +1,7 @@
 package cn.molu.app.service.impl;
 
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
@@ -14,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import cn.hutool.core.map.MapUtil;
 import cn.molu.app.mapper.UserMapper;
 import cn.molu.app.pojo.Email;
+import cn.molu.app.pojo.Message;
 import cn.molu.app.pojo.User;
 import cn.molu.app.pojo.UserQuery;
 import cn.molu.app.service.UserService;
@@ -243,9 +241,48 @@ public class UserServiceImpl implements UserService {
             }
 
         }
-
-
-
         return null;
+    }
+
+    @Override
+    public R addUserMessage(Message message) {
+        String addUserMessage="addUserMessage_"+message.getToId();
+       redisTemplate.opsForList().leftPush(addUserMessage,message);
+        return R.ok("添加成功");
+    }
+
+    @Override
+    public R queryAddUserMessage(String userId) {
+        List<Message> messageList = redisTemplate.opsForList().range("addUserMessage_" + userId, 0, -1);
+        return R.ok(messageList);
+    }
+
+    @Override
+    public R queryAddUserMessageOne(String userId) {
+
+        List<Message> messageList = redisTemplate.opsForList().range("addUserMessage_" + userId, 0, 0);
+        System.out.println(messageList);
+        return  R.ok(messageList.get(0));
+    }
+
+    @Override
+    public R deleAddUserMessage(String userId) {
+        List<Message> messageList = redisTemplate.opsForList().range("addUserMessage_" + userId, 0, 0);
+        List<Map> mapList=new ArrayList<>();
+
+        HashMap<String, Integer> map = new HashMap<>();
+        map.put("userId",Integer.valueOf(messageList.get(0).getFromId()));
+        map.put("friendId",Integer.valueOf(messageList.get(0).getToId()));
+        mapList.add(map);
+        HashMap<String, Integer> map2 = new HashMap<>();
+        map2.put("userId",Integer.valueOf(messageList.get(0).getToId()));
+        map2.put("friendId",Integer.valueOf(messageList.get(0).getFromId()));
+        mapList.add(map2);
+
+        int i = userMapper.addFriendRelationShip(mapList);
+        if(i!=0){
+            redisTemplate.opsForList().leftPop("addUserMessage_" + userId);
+        }
+           return R.ok;
     }
 }

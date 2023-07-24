@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +31,8 @@ public interface UserMapper extends BaseMapper<User> {
     List<Map> queryAlreadyFriend(@Param("userId") Integer userId, @Param("friendId") Integer friendId);
 
     void deleteRelationship(Integer id);
+
+    int addFriendRelationShip(List<Map> mapList);
 
 }
 

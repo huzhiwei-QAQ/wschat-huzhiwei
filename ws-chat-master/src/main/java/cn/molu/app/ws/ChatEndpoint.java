@@ -34,6 +34,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
@@ -134,6 +135,23 @@ public class ChatEndpoint {
         broadcastAllUsers(message);
         LOGGER.info("{}	建立了连接。。。", username);
         LOGGER.info("系统消息推送。。。{}	", message);
+        //获取离线消息
+       if(redisUtils.getListSize("friendRequest_"+userId)>0) {
+           List<Object> listAll1 = redisUtils.getListAll("friendRequest_" + userId);
+           Session toSession = onLineUser.get(userId);
+           if(toSession!=null){
+               Basic basicRemote = toSession.getBasicRemote();
+               try {
+                   for (Object str:listAll1) {
+                       basicRemote.sendText(str.toString());
+                       redisUtils.removeList("friendRequest_" + userId,str.toString());
+                   }
+               } catch (IOException e) {
+                   throw new RuntimeException(e);
+               }
+           }
+
+       }
     }
 
     /**
@@ -182,7 +200,8 @@ public class ChatEndpoint {
                 Basic basicRemote = toSession.getBasicRemote();
                 basicRemote.sendText(resultMessage);
             }else {
-
+                //存离线消息
+                    redisUtils.rPush("friendRequest_"+toId,resultMessage);
             }
         }else {
             if (ObjectUtils.isBlank(toId)) {

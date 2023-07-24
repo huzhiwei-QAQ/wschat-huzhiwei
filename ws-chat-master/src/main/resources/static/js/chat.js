@@ -276,7 +276,15 @@ async function message(event) {
           }
           scrollIntoView();
       }else if(res.messageType==0){
-          console.log("hhhhhhhhhhhhhhh")
+          $.post("/user/addUserMessage", {fromId:res.fromId,fromName:res.fromName,toId:res.toId,toName:res.toName,message:res.message}, function (resData) {
+              if (resData.flag) {
+                  var notificationElement = document.getElementById('notification');
+                  notificationElement.style.display = "inline";
+              }
+          }).catch(function (err) {
+              console.log(err);
+          })
+
       }
     }
 }
@@ -792,10 +800,14 @@ function getUserList(){
                 };
                 // 发送数据给服务器
                 webSocket.send(JSON.stringify(jsonMessage));
+               alert("好友请求已发送，请耐心等待...")
             }
         }).catch(error => {
             console.error(error);
         });
         }
+
+
+
 
 }
